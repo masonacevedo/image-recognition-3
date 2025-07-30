@@ -10,3 +10,4 @@ folder = "cifar_10_imagery"
 dataset = torchvision.datasets.CIFAR10(root=folder, download=True)
 
 model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+training_data, val_data = random_split(dataset, [0.8, 0.2])
