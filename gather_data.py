@@ -5,6 +5,8 @@ import torchvision.transforms.functional as F
 from torch.utils.data import Dataset, random_split, DataLoader
 from torchvision import models
 
+import random
+
 
 folder = "cifar_10_imagery"
 
@@ -23,10 +25,14 @@ transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 
-image, label = dataset[0]
-image.show()
+
+indices = random.sample(range(0, len(dataset)), 5)
+
+for index in indices:
+    image, label = dataset[index]
+    image.show()
 
 
-transformed_tensor = transform(image)
-transformed_image = F.to_pil_image(transformed_tensor)
-transformed_image.show()
+    transformed_tensor = transform(image)
+    transformed_image = F.to_pil_image(transformed_tensor)
+    transformed_image.show()
