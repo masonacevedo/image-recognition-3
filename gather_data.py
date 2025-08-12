@@ -2,7 +2,7 @@ import torchvision.datasets
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as F
 
-from torch.utils.data import Dataset, random_split, DataLoader
+from torch.utils.data import random_split, DataLoader
 from torchvision import models
 
 import random
