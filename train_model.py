@@ -18,6 +18,12 @@ def show_tensor_as_image(t, batch_dimension_index=0):
 myModel = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
 myModel.fc = nn.Linear(myModel.fc.in_features, 10)
 
+for param in myModel.parameters():
+    param.requires_grad = False
+
+for param in myModel.fc.parameters():
+    param.requires_grad = True
+
 folder = "cifar_10_imagery"
 dataset = torchvision.datasets.CIFAR10(root=folder, download=True)
 print("type(dataset):", type(dataset))
