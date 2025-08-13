@@ -16,6 +16,7 @@ def show_tensor_as_image(t, batch_dimension_index=0):
 
 
 myModel = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+myModel.fc = nn.Linear(myModel.fc.in_features, 10)
 
 folder = "cifar_10_imagery"
 dataset = torchvision.datasets.CIFAR10(root=folder, download=True)
@@ -29,7 +30,7 @@ loss_function = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(myModel.parameters(), lr=0.001)
 
 BATCH_SIZE = 16
-EPOCHS = 25
+EPOCHS = 100
 
 myModel.train()
 x_axis = []
