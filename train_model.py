@@ -26,11 +26,6 @@ for param in myModel.fc.parameters():
 
 folder = "cifar_10_imagery"
 dataset = torchvision.datasets.CIFAR10(root=folder, download=True)
-print("type(dataset):", type(dataset))
-print("len(dataset):", len(dataset))
-print("type(dataset[0]):", type(dataset[0]))
-print("type(dataset[0][0]):", type(dataset[0][0]))
-print("type(dataset[0][1]):", type(dataset[0][1]))
 
 loss_function = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(myModel.parameters(), lr=0.001)
@@ -42,7 +37,6 @@ myModel.train()
 x_axis = []
 y_axis = []
 for epoch in range(0, EPOCHS):
-    print("Epoch:", epoch)
     # images = [dataset[epoch*BATCH_SIZE+j][0] for j in range(0, BATCH_SIZE)]
     # for image in images:
     #     show_tensor_as_image(F.to_tensor(image).reshape(1,3,32,32))
@@ -50,7 +44,6 @@ for epoch in range(0, EPOCHS):
     labels = torch.tensor([dataset[epoch*BATCH_SIZE+j][1] for j in range(0, BATCH_SIZE)])
     predictions = myModel(x)
     loss = loss_function(predictions, labels)
-    print("loss:", loss)
     loss.backward()
     optimizer.step()
     optimizer.zero_grad()
