@@ -35,7 +35,9 @@ myModel.train()
 for epoch in range(0, EPOCHS):
 
     print("Epoch:", epoch)
-    
-    x = torch.stack([F.to_tensor(dataset[j][0]) for j in range(0, BATCH_SIZE)])
+    # images = [dataset[epoch*BATCH_SIZE+j][0] for j in range(0, BATCH_SIZE)]
+    # for image in images:
+    #     show_tensor_as_image(F.to_tensor(image).reshape(1,3,32,32))
+    x = torch.stack([F.to_tensor(dataset[epoch*BATCH_SIZE+j][0]) for j in range(0, BATCH_SIZE)])
     y = myModel(x)
     
