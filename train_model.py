@@ -18,6 +18,11 @@ def show_tensor_as_image(t, batch_dimension_index=0):
     plt.imshow(img)
     plt.show()
 
+def custom_collate_fn(batch):
+    images, labels = zip(*batch)
+    images = torch.stack([F.to_tensor(image) for image in images])
+    labels = torch.tensor(labels)
+    return images, labels
 
 myModel = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
 myModel.fc = nn.Linear(myModel.fc.in_features, 10)
@@ -31,34 +36,45 @@ for param in myModel.fc.parameters():
 
 folder = "cifar_10_imagery"
 dataset = torchvision.datasets.CIFAR10(root=folder, download=True)
-# training_data, val_data = random_split(dataset, [0.8, 0.2])
-# training_loader = DataLoader(training_data, batch_size=16, shuffle=True, num_workers=4)
-# validation_loader = DataLoader(val_data, batch_size=16, shuffle=True, num_workers=4)
+training_data, val_data = random_split(dataset, [0.02, 0.98])
+
+training_loader = DataLoader(training_data, batch_size=16, shuffle=True, num_workers=0, collate_fn=custom_collate_fn)
+validation_loader = DataLoader(val_data, batch_size=16, shuffle=True, num_workers=0, collate_fn=custom_collate_fn)
 
 loss_function = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(myModel.parameters(), lr=0.001)
 
 BATCH_SIZE = 16
-EPOCHS = 1000
+EPOCHS = 50
 
 myModel.train()
 x_axis = []
 y_axis = []
 for epoch in range(0, EPOCHS):
-    # for batch, (data, labels) in enumerate(training_loader):
-    #     data, labels = data.to(device), labels.to(device)
+    print("Epoch:", epoch)
+    for batch, (images, labels) in enumerate(training_loader):
+        # print("Batch:", batch)
+        images, labels = images.to(device), labels.to(device)
+        optimizer.zero_grad()
+        predictions = myModel(images)
+        loss = loss_function(predictions, labels)
+        loss.backward()
+        optimizer.step()
+        # print("Loss:", loss.item())
+
+
     # images = [dataset[epoch*BATCH_SIZE+j][0] for j in range(0, BATCH_SIZE)]
     # for image in images:
     #     show_tensor_as_image(F.to_tensor(image).reshape(1,3,32,32))
-    x = torch.stack([F.to_tensor(dataset[epoch*BATCH_SIZE+j][0]) for j in range(0, BATCH_SIZE)])
-    x = x.to(device)
-    labels = torch.tensor([dataset[epoch*BATCH_SIZE+j][1] for j in range(0, BATCH_SIZE)])
-    labels = labels.to(device)
-    predictions = myModel(x)
-    loss = loss_function(predictions, labels)
-    loss.backward()
-    optimizer.step()
-    optimizer.zero_grad()
+    # x = torch.stack([F.to_tensor(dataset[epoch*BATCH_SIZE+j][0]) for j in range(0, BATCH_SIZE)])
+    # x = x.to(device)
+    # labels = torch.tensor([dataset[epoch*BATCH_SIZE+j][1] for j in range(0, BATCH_SIZE)])
+    # labels = labels.to(device)
+    # predictions = myModel(x)
+    # loss = loss_function(predictions, labels)
+    # loss.backward()
+    # optimizer.step()
+    # optimizer.zero_grad()
 
 
     x_axis.append(epoch)
