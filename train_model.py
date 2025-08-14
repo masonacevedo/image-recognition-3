@@ -4,7 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import torchvision.datasets
-import torchvision.transforms.functional as F
+
+import torch.nn.functional as F
+import torchvision.transforms.functional as TF
+
 import torch.nn as nn
 
 from torch.utils.data import random_split, DataLoader
@@ -20,7 +23,7 @@ def show_tensor_as_image(t, batch_dimension_index=0):
 
 def custom_collate_fn(batch):
     images, labels = zip(*batch)
-    images = torch.stack([F.to_tensor(image) for image in images])
+    images = torch.stack([TF.to_tensor(image) for image in images])
     labels = torch.tensor(labels)
     return images, labels
 
@@ -36,7 +39,7 @@ for param in myModel.fc.parameters():
 
 folder = "cifar_10_imagery"
 dataset = torchvision.datasets.CIFAR10(root=folder, download=True)
-training_data, val_data = random_split(dataset, [0.02, 0.98])
+training_data, val_data, _ = random_split(dataset, [0.03, 0.02, 0.95])
 
 training_loader = DataLoader(training_data, batch_size=16, shuffle=True, num_workers=0, collate_fn=custom_collate_fn)
 validation_loader = DataLoader(val_data, batch_size=16, shuffle=True, num_workers=0, collate_fn=custom_collate_fn)
@@ -44,44 +47,72 @@ validation_loader = DataLoader(val_data, batch_size=16, shuffle=True, num_worker
 loss_function = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(myModel.parameters(), lr=0.001)
 
-BATCH_SIZE = 16
-EPOCHS = 50
+BATCH_SIZE = 32
+EPOCHS = 25
 
-myModel.train()
-x_axis = []
-y_axis = []
+epochs_list = []
+losses = []
+accuracies = []
 for epoch in range(0, EPOCHS):
     print("Epoch:", epoch)
+    myModel.train()
     for batch, (images, labels) in enumerate(training_loader):
-        # print("Batch:", batch)
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
         predictions = myModel(images)
         loss = loss_function(predictions, labels)
         loss.backward()
         optimizer.step()
-        # print("Loss:", loss.item())
+
+    num_correct = 0
+    num_seen = 0
+    epoch_loss = 0.0
+    myModel.eval()
+    with torch.no_grad():
+        for batch, (images, labels) in enumerate(validation_loader):
+            images, labels = images.to(device), labels.to(device)
+            logits = myModel(images)
+            predictions = torch.argmax(logits, dim=1)
+            num_correct += (predictions == labels).sum().item()
+            num_seen += len(labels)
+            loss = loss_function(logits, labels)
+            epoch_loss += loss.item()
+    
+    # Calculate average loss for this epoch
+    avg_epoch_loss = epoch_loss / len(validation_loader)
+    losses.append(avg_epoch_loss)
+    
+    accuracy = float(num_correct) / float(num_seen)
+    accuracies.append(accuracy)
+    
+    epochs_list.append(epoch)
+    print(f"Epoch {epoch}: Loss = {avg_epoch_loss:.4f}, Accuracy = {accuracy:.4f}")
+    
+
+plt.figure(figsize=(15, 6))
 
 
-    # images = [dataset[epoch*BATCH_SIZE+j][0] for j in range(0, BATCH_SIZE)]
-    # for image in images:
-    #     show_tensor_as_image(F.to_tensor(image).reshape(1,3,32,32))
-    # x = torch.stack([F.to_tensor(dataset[epoch*BATCH_SIZE+j][0]) for j in range(0, BATCH_SIZE)])
-    # x = x.to(device)
-    # labels = torch.tensor([dataset[epoch*BATCH_SIZE+j][1] for j in range(0, BATCH_SIZE)])
-    # labels = labels.to(device)
-    # predictions = myModel(x)
-    # loss = loss_function(predictions, labels)
-    # loss.backward()
-    # optimizer.step()
-    # optimizer.zero_grad()
+plt.subplot(1, 2, 1)
+plt.plot(epochs_list, losses, 'r-', linewidth=2, marker='o')
+plt.title('Training Loss vs Epochs', fontsize=14, fontweight='bold')
+plt.xlabel('Epochs', fontsize=12)
+plt.ylabel('Loss', fontsize=12)
+plt.grid(True, alpha=0.3)
+plt.xticks(epochs_list[::5] if len(epochs_list) > 10 else epochs_list)
 
 
-    x_axis.append(epoch)
-    y_axis.append(loss.item())
+plt.subplot(1, 2, 2)
+plt.plot(epochs_list, accuracies, 'g-', linewidth=2, marker='s')
+plt.title('Validation Accuracy vs Epochs', fontsize=14, fontweight='bold')
+plt.xlabel('Epochs', fontsize=12)
+plt.ylabel('Accuracy', fontsize=12)
+plt.grid(True, alpha=0.3)
+plt.xticks(epochs_list[::5] if len(epochs_list) > 10 else epochs_list)
 
-plt.plot(x_axis, y_axis)
-plt.title("Epochs vs Loss")
+plt.tight_layout()
 plt.show()
+
+
+
 
     
