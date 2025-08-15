@@ -39,7 +39,7 @@ myModel.to(device)
 
 folder = "cifar_10_imagery"
 dataset = torchvision.datasets.CIFAR10(root=folder, download=True)
-training_data, val_data, _ = random_split(dataset, [0.10, 0.02, 0.88])
+training_data, val_data, _ = random_split(dataset, [0.80, 0.20, 0.0])
 
 training_loader = DataLoader(training_data, batch_size=16, shuffle=True, num_workers=0, collate_fn=custom_collate_fn)
 validation_loader = DataLoader(val_data, batch_size=16, shuffle=True, num_workers=0, collate_fn=custom_collate_fn)
