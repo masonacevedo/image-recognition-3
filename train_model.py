@@ -38,10 +38,11 @@ raw_training_data, val_data, _ = random_split(raw_dataset, [0.80, 0.20, 0.0])
 
 # TODO: ADD NORMALIZATION!
 training_transform = transforms.Compose([
-    transforms.RandomCrop(32, padding=4),
-    transforms.RandomHorizontalFlip(p=0.5),
-    transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.2),
+    # transforms.RandomCrop(32, padding=4),
+    # transforms.RandomHorizontalFlip(p=0.5),
+    # transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.2),
     transforms.ToTensor(),
+    transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2470, 0.2435, 0.2616]),
 ])
 
 validation_transform = transforms.ToTensor()
