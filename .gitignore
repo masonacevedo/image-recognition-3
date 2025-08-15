@@ -1,2 +1,4 @@
 my_env/
+models/
+cifar_10_imagery/
 .DS_Store
