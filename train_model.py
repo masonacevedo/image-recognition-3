@@ -116,7 +116,9 @@ for epoch in range(0, EPOCHS):
     
     epochs_list.append(epoch)
     print(f"Epoch {epoch}: Loss = {avg_epoch_loss:.4f}, Accuracy = {accuracy:.4f}")
-    
+
+torch.save(myModel, "models/1_percent_no_augmentation_v1.pth")
+
 
 plt.figure(figsize=(15, 6))
 
