@@ -31,15 +31,15 @@ myModel = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
 myModel.fc = nn.Linear(myModel.fc.in_features, 10)
 myModel.to(device)
 
-for param in myModel.parameters():
-    param.requires_grad = False
+# for param in myModel.parameters():
+#     param.requires_grad = False
 
-for param in myModel.fc.parameters():
-    param.requires_grad = True
+# for param in myModel.fc.parameters():
+#     param.requires_grad = True
 
 folder = "cifar_10_imagery"
 dataset = torchvision.datasets.CIFAR10(root=folder, download=True)
-training_data, val_data, _ = random_split(dataset, [0.03, 0.02, 0.95])
+training_data, val_data, _ = random_split(dataset, [0.10, 0.02, 0.88])
 
 training_loader = DataLoader(training_data, batch_size=16, shuffle=True, num_workers=0, collate_fn=custom_collate_fn)
 validation_loader = DataLoader(val_data, batch_size=16, shuffle=True, num_workers=0, collate_fn=custom_collate_fn)
@@ -48,7 +48,7 @@ loss_function = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(myModel.parameters(), lr=0.001)
 
 BATCH_SIZE = 32
-EPOCHS = 25
+EPOCHS = 30
 
 epochs_list = []
 losses = []
