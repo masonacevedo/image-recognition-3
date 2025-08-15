@@ -34,13 +34,13 @@ myModel.to(device)
 
 folder = "cifar_10_imagery"
 raw_dataset = torchvision.datasets.CIFAR10(root=folder, download=True)
-raw_training_data, val_data, _ = random_split(raw_dataset, [0.01, 0.01, 0.98])
+raw_training_data, val_data, _ = random_split(raw_dataset, [0.02, 0.01, 0.97])
 
 # TODO: ADD NORMALIZATION!
 training_transform = transforms.Compose([
-    # transforms.RandomCrop(32, padding=4),
-    # transforms.RandomHorizontalFlip(p=0.5),
-    # transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.2),
+    transforms.RandomCrop(32, padding=4),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.2),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2470, 0.2435, 0.2616]),
 ])
@@ -77,7 +77,7 @@ loss_function = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(myModel.parameters(), lr=0.001)
 
 BATCH_SIZE = 32
-EPOCHS = 30
+EPOCHS = 100
 
 epochs_list = []
 losses = []
@@ -117,7 +117,7 @@ for epoch in range(0, EPOCHS):
     epochs_list.append(epoch)
     print(f"Epoch {epoch}: Loss = {avg_epoch_loss:.4f}, Accuracy = {accuracy:.4f}")
 
-torch.save(myModel, "models/1_percent_no_augmentation_v1.pth")
+torch.save(myModel, "models/2_percent_with_augmentation_v1.pth")
 
 
 plt.figure(figsize=(15, 6))
