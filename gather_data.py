@@ -19,9 +19,10 @@ training_data, val_data = random_split(dataset, [0.8, 0.2])
 dataloader = DataLoader(training_data, batch_size=32, shuffle=True, num_workers=4)
 
 transform = transforms.Compose([
-    transforms.RandomCrop(32, padding=4),           # Add padding and random crop
-    transforms.RandomHorizontalFlip(p=0.5),         # Random horizontal flip
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomRotation(degrees=15),
     transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.2),
+    transforms.RandomResizedCrop(32, scale=(0.8, 1.0), ratio=(0.9, 1.1)),
     transforms.ToTensor(),
 ])
 
