@@ -36,7 +36,6 @@ folder = "cifar_10_imagery"
 raw_dataset = torchvision.datasets.CIFAR10(root=folder, download=True)
 raw_training_data, val_data, _ = random_split(raw_dataset, [0.02, 0.01, 0.97])
 
-# TODO: ADD NORMALIZATION!
 training_transform = transforms.Compose([
     transforms.RandomCrop(32, padding=4),
     transforms.RandomHorizontalFlip(p=0.5),
