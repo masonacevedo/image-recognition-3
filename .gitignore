@@ -1,4 +1,5 @@
 my_env/
 models/
 cifar_10_imagery/
+inference_images/
 .DS_Store
