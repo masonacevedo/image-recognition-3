@@ -40,13 +40,13 @@ if __name__ == "__main__":
 
     folder = "cifar_10_imagery"
     raw_dataset = torchvision.datasets.CIFAR10(root=folder, download=True)
-    raw_training_data, val_data, _ = random_split(raw_dataset, [0.90, 0.10, 0.00])
+    raw_training_data, val_data, _ = random_split(raw_dataset, [0.05, 0.01, 0.94])
 
     training_transform = transforms.Compose([
-        # transforms.RandomHorizontalFlip(p=0.5),
-        # transforms.RandomRotation(degrees=15),
-        # transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.2),
-        # transforms.RandomResizedCrop(32, scale=(0.8, 1.0), ratio=(0.9, 1.1)),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomRotation(degrees=15),
+        transforms.ColorJitter(brightness=0.6, contrast=0.6, saturation=0.6, hue=0.4),
+        transforms.RandomResizedCrop(32, scale=(0.8, 1.0), ratio=(0.9, 1.1)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2470, 0.2435, 0.2616]),
     ])
@@ -83,13 +83,12 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(myModel.parameters(), lr=0.001)
 
     BATCH_SIZE = 32
-    EPOCHS = 30
+    EPOCHS = 100
 
     epochs_list = []
     losses = []
     accuracies = []
     for epoch in range(0, EPOCHS):
-        print("Epoch:", epoch)
         myModel.train()
         for batch, (images, labels) in enumerate(training_loader):
             images, labels = images.to(device), labels.to(device)
