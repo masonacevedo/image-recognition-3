@@ -13,6 +13,9 @@ import torch.nn as nn
 
 from torch.utils.data import random_split, DataLoader
 
+import time
+import glob
+import os
 
 def show_tensor_as_image(t, batch_dimension_index=0):
     img = t[batch_dimension_index].detach().cpu().numpy()
@@ -22,15 +25,28 @@ def show_tensor_as_image(t, batch_dimension_index=0):
     plt.show()
 
 if __name__ == "__main__":
+    torch.manual_seed(42)
+    last_update = time.time()
 
     model_name = input("Model Name (for saving):")
 
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
-
-    myModel = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
-    myModel.fc = nn.Linear(myModel.fc.in_features, 10)
-    myModel.to(device)
+    if glob.glob(f"models/{model_name}_epoch_*.pth"):
+        print("Loading model from existing models...")
+        all_models = os.listdir("models")
+        raw_model_paths = list(filter(lambda s: model_name in s, all_models))
+        model_paths = [os.path.join("models", name) for name in raw_model_paths]
+        model_paths.sort(key=lambda x: int(x.split("_epoch_")[-1].split(".pth")[0]))
+        myModel = torch.load(model_paths[-1], weights_only=False)
+        print(f"Loaded model from {model_paths[-1]}")
+        epochs_already_trained = len(model_paths)
+    else:
+        print("Creating new model...")
+        myModel = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+        myModel.fc = nn.Linear(myModel.fc.in_features, 10)
+        myModel.to(device)
+        epochs_already_trained = 0
 
     # for param in myModel.parameters():
     #     param.requires_grad = False
@@ -40,7 +56,7 @@ if __name__ == "__main__":
 
     folder = "cifar_10_imagery"
     raw_dataset = torchvision.datasets.CIFAR10(root=folder, download=True)
-    raw_training_data, val_data, _ = random_split(raw_dataset, [0.05, 0.01, 0.94])
+    raw_training_data, val_data, _ = random_split(raw_dataset, [0.95, 0.05, 0.0])
 
     training_transform = transforms.Compose([
         transforms.RandomHorizontalFlip(p=0.5),
@@ -70,10 +86,6 @@ if __name__ == "__main__":
     transformed_training_data = TransformedDataset(raw_training_data, training_transform)
     transformed_validation_data = TransformedDataset(val_data, validation_transform)
 
-    print("Type of transformed_training_data[0]:", type(transformed_training_data[0]))
-    print("Type of transformed_training_data[0][0]:", type(transformed_training_data[0][0]))
-    print("Type of transformed_training_data[0][1]:", type(transformed_training_data[0][1]))
-
     training_loader = DataLoader(transformed_training_data, batch_size=16, shuffle=True, num_workers=0)
     validation_loader = DataLoader(transformed_training_data, batch_size=16, shuffle=True, num_workers=0)
 
@@ -88,7 +100,7 @@ if __name__ == "__main__":
     epochs_list = []
     losses = []
     accuracies = []
-    for epoch in range(0, EPOCHS):
+    for epoch in range(epochs_already_trained, EPOCHS):
         myModel.train()
         for batch, (images, labels) in enumerate(training_loader):
             images, labels = images.to(device), labels.to(device)
@@ -97,6 +109,9 @@ if __name__ == "__main__":
             loss = loss_function(predictions, labels)
             loss.backward()
             optimizer.step()
+            if time.time() - last_update > 30:
+                last_update = time.time()
+                print(f"Epoch {epoch} | Batch {batch} | Loss: {loss.item()}")
 
         num_correct = 0
         num_seen = 0
@@ -120,7 +135,7 @@ if __name__ == "__main__":
         accuracies.append(accuracy)
         
         epochs_list.append(epoch)
-        print(f"Epoch {epoch}: Loss = {avg_epoch_loss:.4f}, Accuracy = {accuracy:.4f}")
+        print(f"Epoch {epoch} | Loss: {avg_epoch_loss:.4f} | Accuracy: {accuracy:.4f}")
 
         torch.save(myModel, f"models/{model_name}_epoch_{epoch}.pth")
 
