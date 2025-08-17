@@ -21,7 +21,7 @@ dataloader = DataLoader(training_data, batch_size=32, shuffle=True, num_workers=
 transform = transforms.Compose([
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.RandomRotation(degrees=15),
-    transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.2),
+    transforms.ColorJitter(brightness=0.6, contrast=0.6, saturation=0.6, hue=0.4),
     transforms.RandomResizedCrop(32, scale=(0.8, 1.0), ratio=(0.9, 1.1)),
     transforms.ToTensor(),
 ])
