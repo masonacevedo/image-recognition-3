@@ -3,11 +3,13 @@ import torch
 from PIL import Image
 
 import torchvision.transforms as transforms
+import torchvision.transforms.functional as TF
 import torch.nn.functional as F
 
 import os
 
 from train_model import show_tensor_as_image
+
 
 # CIFAR-10 class labels in the correct order
 CIFAR10_CLASSES = [
@@ -18,6 +20,15 @@ CIFAR10_CLASSES = [
 files = os.listdir("inference_images")
 paths = [os.path.join("inference_images", file) for file in files]
 images = [Image.open(path) for path in paths]
+
+# image_tensors = [TF.to_tensor(image) for image in images]
+# for path in paths:
+#     image = Image.open(path)
+#     image_tensor = TF.to_tensor(image)
+#     if image_tensor.shape[0] == 1:
+#         show_tensor_as_image(image_tensor.unsqueeze(0))
+#         print("image_tensor.shape: ", image_tensor.shape, "path: ", path)
+#         input("enter to continue")
 
 device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
