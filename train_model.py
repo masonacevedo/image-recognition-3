@@ -86,15 +86,16 @@ if __name__ == "__main__":
     transformed_training_data = TransformedDataset(raw_training_data, training_transform)
     transformed_validation_data = TransformedDataset(val_data, validation_transform)
 
-    training_loader = DataLoader(transformed_training_data, batch_size=16, shuffle=True, num_workers=0)
-    validation_loader = DataLoader(transformed_training_data, batch_size=16, shuffle=True, num_workers=0)
+    BATCH_SIZE = 32
+    NUM_WORKERS = 0
+    training_loader = DataLoader(transformed_training_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=0)
+    validation_loader = DataLoader(transformed_training_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=0)
 
 
 
     loss_function = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(myModel.parameters(), lr=0.001)
 
-    BATCH_SIZE = 32
     EPOCHS = 100
 
     epochs_list = []
