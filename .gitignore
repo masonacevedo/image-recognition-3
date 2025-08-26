@@ -3,3 +3,4 @@ models/
 cifar_10_imagery/
 inference_images/
 .DS_Store
+__pycache__/
