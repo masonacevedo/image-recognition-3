@@ -6,10 +6,16 @@ import torchvision.transforms as transforms
 import torchvision.transforms.functional as TF
 import torch.nn.functional as F
 
+import matplotlib.pyplot as plt
+import numpy as np
 import os
 
-from train_model import show_tensor_as_image
-
+def show_tensor_as_image(t, batch_dimension_index=0):
+    img = t[batch_dimension_index].detach().cpu().numpy()
+    img = np.transpose(img, (1,2,0))
+    img = (img - img.min()) / (img.max() - img.min())
+    plt.imshow(img)
+    plt.show()
 
 # CIFAR-10 class labels in the correct order
 CIFAR10_CLASSES = [

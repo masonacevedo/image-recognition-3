@@ -17,12 +17,18 @@ import time
 import glob
 import os
 
-def show_tensor_as_image(t, batch_dimension_index=0):
-    img = t[batch_dimension_index].detach().cpu().numpy()
-    img = np.transpose(img, (1,2,0))
-    img = (img - img.min()) / (img.max() - img.min())
-    plt.imshow(img)
-    plt.show()
+
+class TransformedDataset(torch.utils.data.Dataset):
+        def __init__(self, dataset, transform=None):
+            self.dataset = dataset
+            self.transform = transform
+
+        def __len__(self):
+            return len(self.dataset)
+
+        def __getitem__(self, index):
+            image, label = self.dataset[index]
+            return self.transform(image), label
 
 if __name__ == "__main__":
     torch.manual_seed(42)
@@ -48,15 +54,9 @@ if __name__ == "__main__":
         myModel.to(device)
         epochs_already_trained = 0
 
-    # for param in myModel.parameters():
-    #     param.requires_grad = False
-
-    # for param in myModel.fc.parameters():
-    #     param.requires_grad = True
-
     folder = "cifar_10_imagery"
     raw_dataset = torchvision.datasets.CIFAR10(root=folder, download=True)
-    raw_training_data, val_data, _ = random_split(raw_dataset, [0.95, 0.05, 0.0])
+    raw_training_data, val_data, _ = random_split(raw_dataset, [0.80, 0.20, 0.0])
 
     training_transform = transforms.Compose([
         transforms.RandomHorizontalFlip(p=0.5),
@@ -69,34 +69,20 @@ if __name__ == "__main__":
 
     validation_transform = transforms.ToTensor()
 
-    class TransformedDataset(torch.utils.data.Dataset):
-        def __init__(self, dataset, transform=None):
-            self.dataset = dataset
-            self.transform = transform
-
-        def __len__(self):
-            return len(self.dataset)
-
-        def __getitem__(self, index):
-            image, label = self.dataset[index]
-            return self.transform(image), label
-
-
-
     transformed_training_data = TransformedDataset(raw_training_data, training_transform)
     transformed_validation_data = TransformedDataset(val_data, validation_transform)
 
     BATCH_SIZE = 32
     NUM_WORKERS = 0
-    training_loader = DataLoader(transformed_training_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=0)
-    validation_loader = DataLoader(transformed_training_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=0)
+    training_loader = DataLoader(transformed_training_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS)
+    validation_loader = DataLoader(transformed_training_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS)
 
 
 
     loss_function = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(myModel.parameters(), lr=0.001)
 
-    EPOCHS = 100
+    EPOCHS = 200
 
     epochs_list = []
     losses = []
